@@ -4,6 +4,8 @@ import Header from "../components/Header";
 import { EmptyState, ErrorState, LoadingState } from "../components/States";
 import { fetchSessions, fmtClock, fmtDate, hasDraft, type SessionSummary } from "../lib/sessions";
 import { useAuth } from "../lib/auth";
+import StatCard from "../components/StatCard";
+import MiniTrendChart from "../components/MiniTrendChart";
 
 const COLS = "1.4fr 1fr 0.8fr 0.9fr 0.9fr";
 
@@ -32,6 +34,14 @@ export default function Candidate() {
     const q = query.toLowerCase();
     return (s.problem ?? "").toLowerCase().includes(q) || (s.session_id ?? "").toLowerCase().includes(q);
   });
+
+  // Real per-session durations in seconds, oldest first, for the sparkline.
+  // Only sessions with a real duration_ms contribute; nulls are omitted
+  // rather than treated as zero (a zero would flatten the trend falsely).
+  const durationTrend = (sessions ?? [])
+    .filter((s) => s.duration_ms != null && s.duration_ms > 0)
+    .map((s) => s.duration_ms! / 1000)
+    .reverse();
 
   return (
     <div className="page">
@@ -100,10 +110,24 @@ export default function Candidate() {
                 <div className="metric-value">{fmtClock(totalSec)}</div>
                 <div className="metric-sub">Active solving timebase</div>
               </div>
+              <StatCard
+                label="Avg Duration"
+                value={avgSec > 0 ? fmtClock(avgSec) : "—"}
+                note="Across all problems"
+              />
               <div className="metric-card">
-                <div className="metric-label">Average Session Duration</div>
-                <div className="metric-value">{fmtClock(avgSec)}</div>
-                <div className="metric-sub">Across all problems</div>
+                <div className="metric-label">Duration Trend</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 32 }}>
+                  <MiniTrendChart data={durationTrend} />
+                  {durationTrend.length < 2 && (
+                    <span style={{ fontSize: 12, color: "var(--faint)" }}>
+                      {durationTrend.length === 1 ? "Need 2+ sessions for a trend" : "No sessions yet"}
+                    </span>
+                  )}
+                </div>
+                {durationTrend.length >= 2 && (
+                  <div className="metric-sub">Last {durationTrend.length} sessions</div>
+                )}
               </div>
               <div className="metric-card">
                 <div className="metric-label">Last Session Date</div>

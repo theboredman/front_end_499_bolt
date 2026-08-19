@@ -32,17 +32,28 @@ export default function OrgQueue() {
 
   const [query, setQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"date" | "duration" | "assurance">("date");
 
   const totalSec = (sessions ?? []).reduce((sum, s) => sum + (s.duration_ms ?? 0) / 1000, 0);
   const l2Count = (sessions ?? []).filter((s) => (s.assurance_level ?? "").toUpperCase() === "L2").length;
 
-  const filtered = (sessions ?? []).filter((s) => {
+  const filteredUnsorted = (sessions ?? []).filter((s) => {
     if (levelFilter !== "all" && (s.assurance_level ?? "").toLowerCase() !== levelFilter.toLowerCase()) {
       return false;
     }
     if (!query.trim()) return true;
     const q = query.toLowerCase();
     return (s.problem ?? "").toLowerCase().includes(q) || (s.session_id ?? "").toLowerCase().includes(q);
+  });
+
+  const sorted = [...filteredUnsorted].sort((a, b) => {
+    if (sortBy === "date") {
+      return (b.submitted_at ?? 0) - (a.submitted_at ?? 0);
+    }
+    if (sortBy === "duration") {
+      return (b.duration_ms ?? 0) - (a.duration_ms ?? 0);
+    }
+    return (a.assurance_level ?? "zzz").localeCompare(b.assurance_level ?? "zzz");
   });
 
   return (
@@ -142,6 +153,17 @@ export default function OrgQueue() {
                 >
                   L2
                 </button>
+                <select
+                  className="search-input"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  style={{ minWidth: 140 }}
+                  aria-label="Sort sessions"
+                >
+                  <option value="date">Sort: Date (newest)</option>
+                  <option value="duration">Sort: Duration (longest)</option>
+                  <option value="assurance">Sort: Assurance level</option>
+                </select>
               </div>
             </div>
 
@@ -155,7 +177,7 @@ export default function OrgQueue() {
                 <span role="columnheader">Status</span>
                 <span role="columnheader">Action</span>
               </div>
-              {filtered.map((s) => (
+              {sorted.map((s) => (
                 <div key={s.session_id} className="table-row" role="row" style={{ gridTemplateColumns: COLS }}>
                   <span role="cell" style={{ fontFamily: "var(--mono)", fontSize: 12, fontWeight: 600 }}>
                     {s.session_id}

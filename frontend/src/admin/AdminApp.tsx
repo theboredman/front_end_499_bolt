@@ -312,6 +312,17 @@ function OverviewTab({ overview, orgs }: { overview: Overview | null; orgs: Org[
   const s = overview.sessions;
   const orphaned = (orgs ?? []).filter((o) => o.admin_count === 0).length;
 
+  const alerts: { level: "error" | "warning"; msg: string }[] = [];
+  if (overview.orgs === 0) {
+    alerts.push({ level: "error", msg: "No organisations on the platform." });
+  }
+  if (s.analysable === 0) {
+    alerts.push({ level: "warning", msg: "No analysable sessions — analysis pipeline has no input." });
+  }
+  if (s.labelled === 0 && s.total > 0) {
+    alerts.push({ level: "warning", msg: "No labelled sessions — six Layer 2 features are blocked by this." });
+  }
+
   return (
     <>
       <div className="eyebrow">Platform</div>
@@ -319,6 +330,24 @@ function OverviewTab({ overview, orgs }: { overview: Overview | null; orgs: Org[
       <p className="page-sub" style={{ marginBottom: 28 }}>
         Counts only. Reading a customer's session goes through the audited data-access path, not this page.
       </p>
+
+      {alerts.length > 0 && (
+        <div className="card" style={{ borderColor: "var(--color-flag-ink)", marginBottom: 24 }}>
+          <div className="mono-label" style={{ marginBottom: 10 }}>Alerts</div>
+          {alerts.map((a, i) => (
+            <div
+              key={i}
+              style={{
+                fontSize: 13,
+                color: a.level === "error" ? "var(--color-flag-ink)" : "var(--color-coral-ink)",
+                marginBottom: 4,
+              }}
+            >
+              {a.level === "error" ? "\u25cf" : "\u25cb"} {a.msg}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 32 }}>
         <Stat label="Organisations" value={overview.orgs} note={orphaned ? `${orphaned} with no administrator` : undefined} alarm={orphaned > 0} />
