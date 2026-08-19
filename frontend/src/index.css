@@ -1,0 +1,1124 @@
+/* ============================================================
+   ProblemProof — single shared stylesheet (design system)
+
+   Implements docs/front_end_guildlines/problemproof-style-reference.md:
+   clinical-modern instrument panel, one cobalt signal colour, coral reserved
+   for genuine peaks, soft colour-tinted glow instead of hard offset shadows.
+
+   Two deliberate departures from the reference, both for contrast. It
+   specifies a "Verified" pill as white text on Verified Mint (#14B888) and a
+   "Flagged" pill as white on Flag Red (#DC3D4A). Measured, those are 2.55:1
+   and 4.37:1 — the first fails WCAG AA badly, the second misses it. Frontend
+   Spec §10 sets a higher floor than ordinary software, on the grounds that a
+   product claiming not to penalise different thinking styles cannot ship an
+   interface that penalises different bodies.
+
+   So the reference hues are kept exactly as specified wherever they are
+   SIGNAL — dots, trace strokes, glows, borders — and a darkened companion is
+   used wherever text sits on or in them. Same hue, same intent, legible.
+   ============================================================ */
+
+:root {
+  /* --- reference palette, verbatim ------------------------------------- */
+  --color-porcelain: #f3f4f7;
+  --color-graphite-ink: #14161a;
+  --color-cognition-blue: #3f4ce0;
+  --color-signal-coral: #ff6a4d;
+  --color-verified-mint: #14b888;
+  --color-flag-red: #dc3d4a;
+  --color-slate: #5b6472;
+  --color-card-white: #ffffff;
+
+  /* --- text-safe companions (hue preserved, lightness lowered) ---------- */
+  --color-mint-ink: #0f8663;
+  --color-flag-ink: #db3846;
+  --color-coral-ink: #e52500;
+
+  /* --- semantic aliases -------------------------------------------------- */
+  --bg: var(--color-porcelain);
+  --surface: var(--color-card-white);
+  --text: var(--color-graphite-ink);
+  --text-body: #2c313a;
+  --muted: var(--color-slate);
+  --faint: #8b93a1;
+  --border: #e4e6ec;
+  --border-soft: #eeeff3;
+  --grid-line: #eceef3;
+
+  --accent: var(--color-cognition-blue);
+  --accent-hover: #4d59e8;
+  --accent-tint: #eef0fd;
+  --accent-border: #d9ddf9;
+
+  /* Legacy names still referenced by pages not yet migrated, mapped onto the
+     new palette rather than left as a second competing set of colours. */
+  --teal: var(--color-cognition-blue);
+  --teal-dark: #3542c4;
+  --teal-tint: var(--accent-tint);
+  --teal-border: var(--accent-border);
+  --amber: var(--color-coral-ink);
+  --violet: var(--color-cognition-blue);
+  --red: var(--color-flag-ink);
+  --green: var(--color-mint-ink);
+
+  /* --- type -------------------------------------------------------------- */
+  --font-instrument-serif: "Instrument Serif", "Playfair Display", ui-serif, Georgia, serif;
+  --font-space-grotesk: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-space-mono: "Space Mono", "JetBrains Mono", ui-monospace, monospace;
+  --sans: var(--font-space-grotesk);
+  /* The sans/mono split stays load-bearing (Frontend Spec §4): anything the
+     system MEASURED is mono, anything a human or the analysis engine WROTE is
+     sans. Space Mono is the reference's "data layer" face, so the existing
+     rule and the new type system agree rather than compete. */
+  --mono: var(--font-space-mono);
+  --display: var(--font-instrument-serif);
+
+  /* --- shape ------------------------------------------------------------- */
+  --radius-button: 999px;
+  --radius-card: 20px;
+  --radius-chip: 999px;
+
+  /* --- elevation: glow, never offset ------------------------------------- */
+  --shadow-card: 0 4px 32px rgba(20, 22, 26, 0.08);
+  --shadow-pulse: 0 8px 24px rgba(63, 76, 224, 0.28);
+  --shadow-pulse-hover: 0 10px 32px rgba(63, 76, 224, 0.38);
+  --shadow-nav: 0 2px 16px rgba(20, 22, 26, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c3ccd6;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9b4c1;
+}
+
+/* ---------- layout ---------- */
+
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 48px 32px 96px;
+}
+
+/* ---------- header ---------- */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 32px;
+  background: var(--surface);
+  box-shadow: var(--shadow-nav);
+  position: relative;
+  z-index: 5;
+}
+
+.site-header a.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.nav-link {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-slate);
+  text-decoration: none;
+  padding: 6px 2px;
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link.active {
+  color: var(--color-graphite-ink);
+  box-shadow: inset 0 -2px 0 var(--color-cognition-blue);
+}
+
+/* ---------- typography ---------- */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-cognition-blue);
+  margin-bottom: 12px;
+}
+
+.page-title {
+  font-family: var(--sans);
+  font-size: 32px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--color-graphite-ink);
+  margin: 0 0 8px;
+}
+
+.page-sub {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--color-slate);
+  margin: 0;
+  max-width: 560px;
+}
+
+.mono-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border: none;
+  border-radius: var(--radius-button);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.btn.small {
+  padding: 9px 18px;
+  font-size: 13.5px;
+}
+
+.btn-primary {
+  background: var(--color-cognition-blue);
+  color: #fff;
+  box-shadow: var(--shadow-pulse);
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-pulse-hover);
+}
+
+.btn-dark {
+  background: var(--color-graphite-ink);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(20, 22, 26, 0.22);
+}
+.btn-dark:hover {
+  background: #22262d;
+  box-shadow: 0 10px 30px rgba(20, 22, 26, 0.3);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-graphite-ink);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.btn-ghost:hover {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--accent-border), var(--shadow-card);
+}
+
+.btn:disabled {
+  background: transparent;
+  border: none;
+  /* The glow is the Pulse Button's whole signal — "this is the one live action
+     on the screen". A disabled control that still glows says the opposite of
+     what it means, so the shadow is removed rather than dimmed. */
+  box-shadow: inset 0 0 0 1px var(--border);
+  /* 4.52:1 on porcelain. Disabled controls are exempt from WCAG contrast, but
+     §10 sets a higher bar here and the label is genuinely informative —
+     someone needs to know what the button they cannot press would do. */
+  color: #6a707d;
+  cursor: not-allowed;
+}
+
+/* ---------- cards ---------- */
+
+.card {
+  background: var(--surface);
+  border: none;
+  border-radius: var(--radius-card);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.card.tint {
+  background: var(--accent-tint);
+  box-shadow: none;
+}
+
+/* joined stat/feature grid (1px gaps showing the border color) */
+.cell-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.cell-grid > div {
+  background: var(--surface);
+  padding: 20px 22px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* ---------- table ---------- */
+
+.table {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.table-head,
+.table-row {
+  display: grid;
+  align-items: center;
+  padding: 14px 20px;
+}
+
+.table-head {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.table-row {
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+/* ---------- empty state ---------- */
+
+.empty {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 56px 32px;
+  text-align: center;
+}
+
+.empty h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.empty p {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin: 0 auto 20px;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+/* ---------- misc ---------- */
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.pp-fade {
+  animation: ppFade 0.28s ease;
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--border-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  transition: width 0.3s ease;
+}
+
+/* ============================================================
+   Exam (dark) screen
+   ============================================================ */
+
+.exam-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #eef1f6;
+  color: #1b2432;
+  font-family: var(--sans);
+}
+
+.exam-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 58px;
+  padding: 0 20px;
+  border-bottom: 1px solid #e3e8f0;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(27, 36, 50, 0.04);
+  flex-shrink: 0;
+}
+
+.exam-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 1px solid #d5dce8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #3d485a;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.exam-btn:hover {
+  border-color: #b7c0ce;
+  background: #f5f7fb;
+}
+
+.exam-btn.submit {
+  border: 1px solid transparent;
+  background: var(--teal);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(14, 156, 142, 0.3);
+}
+
+.exam-btn.submit:hover {
+  filter: brightness(1.05);
+  background: var(--teal);
+}
+
+.exam-panel-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: #6b7688;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.exam-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-family: var(--sans);
+  font-size: 15.5px;
+  color: var(--color-graphite-ink);
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.exam-input::placeholder {
+  color: #9aa4b4;
+}
+
+/* Fields carry their own focus ring, so they are excluded from the generic
+   outline above — the two together render as a doubled border. This is still a
+   visible keyboard focus indicator, which is what §10 requires. */
+.exam-input:focus-visible,
+.exam-input:focus {
+  border-color: var(--color-cognition-blue);
+  box-shadow: 0 0 0 4px rgba(63, 76, 224, 0.18);
+}
+
+.phase-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 11px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.phase-btn:hover {
+  background: #f0f3f8;
+}
+
+.event-row {
+  animation: ppRow 0.3s ease;
+  background: #f5f7fb;
+  padding: 8px 10px;
+}
+
+/* ---------- animations ---------- */
+
+@keyframes ppFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ppRow {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ppRec {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes ppScan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(2400%);
+  }
+}
+
+.pp-rec-dot {
+  animation: ppRec 1.4s ease infinite;
+}
+
+.pp-scan-line {
+  animation: ppScan 4s linear infinite;
+}
+
+/* ============================================================
+   Accessibility layer
+   ============================================================ */
+
+/* Visible keyboard focus on every interactive element. Mouse clicks
+   (which don't match :focus-visible) stay ring-free. */
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible,
+.btn:focus-visible,
+.exam-btn:focus-visible,
+.nav-link:focus-visible,
+.phase-btn:focus-visible {
+  outline: 2px solid var(--color-cognition-blue);
+  outline-offset: 3px;
+  /* `inherit` so the ring follows the element's own shape. Buttons are full
+     pills now, and a square ring around a pill reads as a rendering fault. */
+  border-radius: inherit;
+}
+
+/* Don't show the ring when focus lands on a container programmatically
+   (e.g. skip-link target) — only when it's genuinely keyboard-driven. */
+main:focus,
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Screen-reader-only text. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — hidden until focused, then pinned top-left. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 100;
+  padding: 9px 16px;
+  background: var(--text);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ---------- confirm modal ---------- */
+
+.pp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(18, 22, 29, 0.44);
+  backdrop-filter: blur(2px);
+  animation: ppFade 0.16s ease;
+}
+
+.pp-modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(18, 22, 29, 0.22);
+  padding: 26px 26px 22px;
+}
+
+.pp-modal h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.pp-modal p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+.pp-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+.btn-danger:hover {
+  filter: brightness(0.95);
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pp-rec-dot,
+  .pp-scan-line {
+    animation: none !important;
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  .container {
+    padding: 28px 20px 64px;
+  }
+  .site-header {
+    padding: 0 20px;
+  }
+  .nav {
+    gap: 16px;
+  }
+}
+
+/* ---------- elevated portal design system ---------- */
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.role-badge.candidate {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+.role-badge.reviewer {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0369a1;
+}
+.role-badge.org_admin {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #5b21b6;
+}
+.role-badge.labeller {
+  background: #fefce8;
+  border-color: #fef08a;
+  color: #854d0e;
+}
+.role-badge.staff {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #9f1239;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--mono);
+  line-height: 1.15;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.metric-sub {
+  font-size: 11px;
+  color: var(--faint);
+  font-family: var(--mono);
+}
+
+.card-interactive {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(18, 22, 29, 0.06);
+  border-color: var(--text);
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  width: 260px;
+  max-width: 100%;
+}
+.search-input input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.copy-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.copy-btn:hover {
+  background: var(--bg);
+  border-color: var(--text);
+}
+
+/* ---------- IDE Workspace Layout ---------- */
+
+.ide-workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  background: #141419;
+  color: #e4e4e7;
+  overflow: hidden;
+}
+
+.ide-activity-bar {
+  width: 48px;
+  background: #0f0f14;
+  border-right: 1px solid #23232c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ide-activity-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #71717a;
+  font-size: 17px;
+  cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+.ide-activity-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.ide-activity-btn.active {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border-left: 2px solid #38bdf8;
+  border-radius: 0 8px 8px 0;
+}
+
+.ide-sidebar {
+  width: 280px;
+  background: #181820;
+  border-right: 1px solid #282834;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.ide-sidebar-header {
+  padding: 12px 14px;
+  font-size: 11px;
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+  border-bottom: 1px solid #242430;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ide-tree-node {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d4d4d8;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+.ide-tree-node:hover {
+  background: #20202c;
+  color: #ffffff;
+}
+.ide-tree-node.active {
+  background: #252636;
+  color: #38bdf8;
+  border-left-color: #38bdf8;
+  font-weight: 500;
+}
+
+.ide-editor-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #1e1e24;
+  position: relative;
+  overflow: hidden;
+}
+
+.ide-tabs-bar {
+  display: flex;
+  align-items: center;
+  background: #14141a;
+  border-bottom: 1px solid #282834;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.ide-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: #a1a1aa;
+  border-right: 1px solid #282834;
+  border-bottom: 2px solid transparent;
+  background: #181820;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.ide-tab:hover {
+  background: #1e1e27;
+  color: #ffffff;
+}
+.ide-tab.active {
+  background: #1e1e24;
+  color: #ffffff;
+  border-bottom-color: #38bdf8;
+  font-weight: 600;
+}
+
+.ide-breadcrumbs {
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #71717a;
+  background: #181820;
+  border-bottom: 1px solid #252532;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ide-code-surface {
+  flex: 1;
+  display: flex;
+  overflow-y: auto;
+  background: #18181f;
+  position: relative;
+}
+
+.ide-gutter-col {
+  padding: 16px 10px 16px 8px;
+  background: #141419;
+  border-right: 1px solid #262632;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 22px;
+  color: #4a4a58;
+  text-align: right;
+  user-select: none;
+  flex-shrink: 0;
+  min-width: 44px;
+}
+
+.ide-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f4f4f5;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  padding: 16px 18px;
+  resize: none;
+  white-space: pre;
+  tab-size: 4;
+  caret-color: #38bdf8;
+}
+
+.ide-bottom-dock {
+  background: #131317;
+  border-top: 1px solid #2b2b38;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.ide-dock-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  background: #0f0f13;
+  border-bottom: 1px solid #242430;
+  height: 32px;
+}
+
+.ide-dock-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #71717a;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ide-dock-tab-btn:hover {
+  color: #d4d4d8;
+}
+.ide-dock-tab-btn.active {
+  color: #ffffff;
+  border-bottom-color: #38bdf8;
+}
+
+.ide-terminal-body {
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-y: auto;
+  color: #d4d4d8;
+}
+
+.ide-status-bar {
+  height: 24px;
+  background: #007acc;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ide-status-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ide-status-item.clickable {
+  cursor: pointer;
+}
+.ide-status-item.clickable:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
